@@ -921,11 +921,15 @@ button {
         align-items: center;
         justify-content: center;
         flex: 1;
+        /* Distribui espaço igual */
+        max-width: 25%;
+        /* Garante que não estoure */
         height: 100%;
         cursor: pointer;
         color: #262626;
-        /* Cor padrão dark cinza */
         -webkit-tap-highlight-color: transparent;
+        padding: 0;
+        margin: 0;
     }
 
     .nav-item.active {
@@ -966,7 +970,11 @@ button {
 
         .bottom-nav {
             display: flex !important;
-            /* Mostra barra inferior no mobile */
+            flex-direction: row !important;
+            /* FORÇA LADO A LADO */
+            justify-content: space-around !important;
+            align-items: center !important;
+            width: 100% !important;
         }
 
         .header-badge {
