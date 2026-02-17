@@ -799,6 +799,9 @@ function abrirFotoGrande(dataURL) {
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
+// ==========================================
+// GERAR PDF PROFISSIONAL (Estilo Concessionária)
+// ==========================================
 function gerarPDFFotos() {
     if (!fotosVeiculo || fotosVeiculo.length === 0) {
         alert('📭 Sem fotos para gerar PDF');
@@ -809,46 +812,117 @@ function gerarPDFFotos() {
     const modelo = document.getElementById('modelo')?.value || 'SEM_MODELO';
     const chassi = document.getElementById('chassi')?.value || 'SEM_CHASSI';
 
-    const MAXFOTOS = 16;
-    const fotosUsar = fotosVeiculo.slice(0, MAXFOTOS);
+    // Configurações da oficina (puxa do config.js se existir)
+    const cfg = window.OFICINA_CONFIG || { nome: 'OFICINA' };
 
-    let html = '';
+    // Layout Estilo Concessionária
+    const estilo = `
+        <style>
+            @page { size: A4; margin: 0; }
+            body { font-family: 'Helvetica', sans-serif; -webkit-print-color-adjust: exact; margin: 0; padding: 0; background: #fff; }
+            .page-container { width: 210mm; min-height: 297mm; padding: 15mm; margin: 0 auto; box-sizing: border-box; position: relative; }
+            
+            /* Cabeçalho Premium */
+            .header { border-bottom: 3px solid #c32421; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+            .header-logo img { max-height: 70px; }
+            .header-info { text-align: right; font-size: 11px; color: #555; }
+            .header-info h1 { margin: 0; font-size: 20px; color: #333; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+            
+            /* Dados do Veículo e Cliente em Grid */
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee; }
+            .info-box h3 { margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; color: #c32421; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+            .info-row { font-size: 11px; margin-bottom: 4px; display: flex; }
+            .info-label { font-weight: bold; width: 80px; color: #444; }
+            .info-value { flex: 1; color: #000; font-weight: 600; }
+            
+            /* Fotos em Grid Moderno */
+            .fotos-grid-pdf { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .foto-card { background: #fff; border: 1px solid #ddd; padding: 4px; border-radius: 4px; break-inside: avoid; }
+            .foto-img { width: 100%; height: 200px; object-fit: cover; border-radius: 2px; }
+            .foto-meta { font-size: 9px; color: #777; margin-top: 4px; display: flex; justify-content: space-between; }
+            
+            /* Rodapé */
+            .footer { position: absolute; bottom: 10mm; left: 15mm; right: 15mm; font-size: 9px; color: #aaa; text-align: center; border-top: 1px solid #eee; padding-top: 10px; }
+        </style>
+    `;
 
-    for (let i = 0; i < fotosUsar.length; i += 4) {
-        const isLastGroup = i + 4 >= fotosUsar.length;
+    let html = estilo + '<div class="page-container">';
+
+    // Cabeçalho
+    html += `
+        <div class="header">
+            <div class="header-logo"><img src="${cfg.logo || 'logo.png'}" alt="Logo"></div>
+            <div class="header-info">
+                <h1>${cfg.nome || 'OFICINA'}</h1>
+                <div>${cfg.endereco || ''}</div>
+                <div>${cfg.telefone || ''} | ${cfg.whatsapp || ''}</div>
+                <div>${cfg.cnpj ? 'CNPJ: ' + cfg.cnpj : ''}</div>
+            </div>
+        </div>
+    `;
+
+    // Dados
+    html += `
+        <div class="info-grid">
+            <div class="info-box">
+                <h3>Dados do Veículo</h3>
+                <div class="info-row"><span class="info-label">Placa:</span><span class="info-value">${placa}</span></div>
+                <div class="info-row"><span class="info-label">Modelo:</span><span class="info-value">${modelo}</span></div>
+                <div class="info-row"><span class="info-label">Chassi:</span><span class="info-value">${chassi}</span></div>
+            </div>
+            <div class="info-box">
+                <h3>Detalhes da Inspeção</h3>
+                <div class="info-row"><span class="info-label">Data:</span><span class="info-value">${new Date().toLocaleDateString('pt-BR')}</span></div>
+                <div class="info-row"><span class="info-label">Total Fotos:</span><span class="info-value">${fotosVeiculo.length}</span></div>
+                <div class="info-row"><span class="info-label">Rastreio:</span><span class="info-value">#${Date.now().toString().slice(-6)}</span></div>
+            </div>
+        </div>
+        
+        <div class="info-box" style="margin-bottom: 15px;">
+            <h3>Registro Fotográfico</h3>
+        </div>
+        <div class="fotos-grid-pdf">
+    `;
+
+    // Loop Fotos
+    const MAX_FOTOS_PDF = 12; // Limite para não ficar gigante
+    fotosVeiculo.slice(0, MAX_FOTOS_PDF).forEach((foto, i) => {
         html += `
-            <div style="width: 100%; min-height: 100vh; box-sizing: border-box; padding: 20px; font-family: Arial, sans-serif; ${isLastGroup ? '' : 'page-break-after: always;'}">
-                <div style="background: #f5f5f5; border: 2px solid #e41616; border-radius: 6px; padding: 10px 15px; margin-bottom: 15px; font-size: 11px; line-height: 1.5;">
-                    <div style="font-weight: bold; color: #e41616; font-size: 12px; margin-bottom: 5px;">- INSPEÇÃO DE FOTOS</div>
-                    <div><strong>Placa:</strong> ${placa}</div>
-                    <div><strong>Modelo:</strong> ${modelo}</div>
-                    <div><strong>Chassi:</strong> ${chassi}</div>
+            <div class="foto-card">
+                <img src="${foto.dataURL}" class="foto-img">
+                <div class="foto-meta">
+                    <span>${foto.data}</span>
+                    <span>Foto ${i + 1}</span>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            </div>
         `;
+    });
 
-        for (let j = 0; j < 4 && (i + j) < fotosUsar.length; j++) {
-            const foto = fotosUsar[i + j];
-            const num = i + j + 1;
-            html += `
-                <div style="text-align: center;">
-                    <img src="${foto.dataURL}" style="width: 100%; max-width: 260px; max-height: 260px; height: auto; border-radius: 6px; border: 1px solid #e41616;">
-                    <div style="font-size: 9px; margin-top: 5px; color: #555;">
-                        Foto ${num} - ${foto.legenda || foto.data}
-                    </div>
-                </div>
-            `;
-        }
-        html += `</div></div>`;
+    html += `</div>`; // fecha grid
+
+    // Rodapé
+    html += `
+        <div class="footer">
+            Relatório gerado digitalmente em ${new Date().toLocaleString('pt-BR')} • ${cfg.nome} • Sistema Fast Car
+        </div>
+    </div>`; // fecha page-container
+
+    const opt = {
+        margin: 0,
+        filename: `Inspecao_${placa}_${Date.now()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Botão de Compartilhar no WhatsApp
+    if (confirm("Deseja enviar o relatório para o cliente via WhatsApp após gerar?")) {
+        const mensagem = `Olá! Aqui está o relatório de inspeção do veículo placa *${placa}* realizado na *${cfg.nome}*. 🚗📸`;
+        const linkZap = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        window.open(linkZap, '_blank');
     }
 
-    html2pdf().set({
-        filename: `Fotos-${placa}.pdf`,
-        margin: 0,
-        image: { type: 'jpeg', quality: 0.9 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { format: 'a4', orientation: 'portrait', unit: 'pt' }
-    }).from(html).save();
+    html2pdf().set(opt).from(html).save();
 }
 
 // ==========================================
