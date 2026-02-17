@@ -1172,7 +1172,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // ==========================================
-// PDF ORÇAMENTO (DEALERSHIP STYLE)
+// PDF ORÇAMENTO (PROFISSIONAL & LIMPO)
 // ==========================================
 function gerarPDFOrcamento() {
     if (itensOrcamento.length === 0) {
@@ -1194,8 +1194,8 @@ function gerarPDFOrcamento() {
         totalPecas += item.valor;
         return `
             <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 8px; font-size: 12px;">${item.descricao}</td>
-                <td style="padding: 8px; font-size: 12px; text-align: right;">R$ ${item.valor.toFixed(2)}</td>
+                <td style="padding: 8px; font-size: 12px; color: #333;">${item.descricao}</td>
+                <td style="padding: 8px; font-size: 12px; text-align: right; color: #333;">R$ ${item.valor.toFixed(2)}</td>
             </tr>`;
     }).join('');
 
@@ -1203,116 +1203,117 @@ function gerarPDFOrcamento() {
         totalServicos += item.valor;
         return `
             <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 8px; font-size: 12px;">${item.descricao}</td>
-                <td style="padding: 8px; font-size: 12px; text-align: right;">R$ ${item.valor.toFixed(2)}</td>
+                <td style="padding: 8px; font-size: 12px; color: #333;">${item.descricao}</td>
+                <td style="padding: 8px; font-size: 12px; text-align: right; color: #333;">R$ ${item.valor.toFixed(2)}</td>
             </tr>`;
     }).join('');
 
     const totalGeral = totalPecas + totalServicos;
+    const corTema = config.corPrimaria || '#000000'; // Preto se não tiver cor defined (Fica mais pro)
 
+    // Conteúdo HTML Puro para o PDF (Sem botões, sem scripts, só visual)
     const conteudoPDF = `
-        <div style="font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; color: #333;">
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; background: #fff;">
             
             <!-- CABEÇALHO -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid ${config.corPrimaria || '#e41616'}; padding-bottom: 20px; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    ${config.logo ? `<img src="${config.logo}" style="height: 60px; object-fit: contain;">` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 2px solid ${corTema};">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    ${config.logo ? `<img src="${config.logo}" style="height: 80px; width: auto; object-fit: contain;">` : ''}
                     <div>
-                        <h1 style="margin: 0; font-size: 24px; color: ${config.corPrimaria || '#e41616'}; text-transform: uppercase;">${config.nome || 'NOME DA OFICINA'}</h1>
-                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                            ${config.subtitulo || ''}<br>
+                        <h1 style="margin: 0; font-size: 22px; color: ${corTema}; text-transform: uppercase; font-weight: 800;">${config.nome || 'NOME DA OFICINA'}</h1>
+                        <div style="font-size: 11px; color: #555; margin-top: 8px; line-height: 1.5;">
+                            ${config.subtitulo ? `<strong>${config.subtitulo}</strong><br>` : ''}
                             ${config.endereco || ''}<br>
                             ${config.telefone || ''}
                         </div>
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <h2 style="margin: 0; font-size: 30px; color: #333;">ORÇAMENTO</h2>
-                    <p style="margin: 5px 0 0; font-size: 14px; color: #666;">Data: ${dataHoje}</p>
+                    <div style="background: ${corTema}; color: #fff; padding: 5px 15px; border-radius: 4px; font-size: 14px; font-weight: bold; display: inline-block;">ORÇAMENTO</div>
+                    <p style="margin: 10px 0 0; font-size: 12px; color: #666;">Data: ${dataHoje}</p>
                 </div>
             </div>
 
-            <!-- DADOS DO CLIENTE/VEÍCULO -->
-            <div style="background: #f8f9fa; border: 1px solid #ddd; border-top: 3px solid #333; padding: 15px; display: flex; justify-content: space-between; margin-bottom: 30px;">
-                <div style="font-size: 12px; line-height: 1.6;">
-                    <strong>CLIENTE:</strong><br>
-                    <span style="font-size: 14px;">${cliente}</span>
+            <!-- CLIENTE CARD -->
+            <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 30px 0; display: flex; justify-content: space-between;">
+                <div>
+                    <span style="font-size: 10px; text-transform: uppercase; color: #888; font-weight: bold;">CLIENTE</span><br>
+                    <strong style="font-size: 16px; color: #333;">${cliente}</strong>
                 </div>
-                <div style="font-size: 12px; line-height: 1.6;">
-                    <strong>VEÍCULO:</strong><br>
-                    <span style="font-size: 14px;">${modelo}</span>
+                <div>
+                    <span style="font-size: 10px; text-transform: uppercase; color: #888; font-weight: bold;">VEÍCULO</span><br>
+                    <strong style="font-size: 16px; color: #333;">${modelo}</strong>
                 </div>
-                <div style="font-size: 12px; line-height: 1.6;">
-                    <strong>PLACA:</strong><br>
-                    <span style="background: #ddd; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 14px;">${placa.toUpperCase()}</span>
+                <div>
+                    <span style="font-size: 10px; text-transform: uppercase; color: #888; font-weight: bold;">PLACA</span><br>
+                    <div style="background: #e9ecef; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 16px; text-align: center; border: 1px solid #ced4da; margin-top: 2px;">${placa.toUpperCase()}</div>
                 </div>
             </div>
 
-            <!-- TABELAS LADO A LADO -->
-            <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-                
+            <!-- TABELAS -->
+            <div style="display: flex; gap: 30px; margin-bottom: 30px;">
                 <!-- PEÇAS -->
                 <div style="flex: 1;">
-                    <h3 style="background: #eee; padding: 8px; margin: 0 0 10px; font-size: 14px; border-left: 4px solid #666;">📦 PEÇAS</h3>
+                    <h3 style="font-size: 12px; text-transform: uppercase; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">📦 Peças Substituídas</h3>
                     <table style="width: 100%; border-collapse: collapse;">
-                        ${linhasPecas || '<tr><td colspan="2" style="padding:10px; text-align:center; font-size:12px; color:#999;">Nenhuma peça</td></tr>'}
-                        <tr style="background: #f9f9f9; font-weight: bold;">
-                            <td style="padding: 8px; text-align: right;">SUBTOTAL PEÇAS</td>
-                            <td style="padding: 8px; text-align: right; color: ${config.corPrimaria || '#e41616'};">R$ ${totalPecas.toFixed(2)}</td>
-                        </tr>
+                        ${linhasPecas || '<tr><td colspan="2" style="padding:10px; text-align:center; font-size:11px; color:#999;">-</td></tr>'}
                     </table>
                 </div>
-
                 <!-- SERVIÇOS -->
                 <div style="flex: 1;">
-                    <h3 style="background: #eee; padding: 8px; margin: 0 0 10px; font-size: 14px; border-left: 4px solid #666;">🔧 SERVIÇOS (Mão de Obra)</h3>
+                    <h3 style="font-size: 12px; text-transform: uppercase; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">🔧 Serviços Realizados</h3>
                     <table style="width: 100%; border-collapse: collapse;">
-                        ${linhasServicos || '<tr><td colspan="2" style="padding:10px; text-align:center; font-size:12px; color:#999;">Nenhum serviço</td></tr>'}
-                        <tr style="background: #f9f9f9; font-weight: bold;">
-                            <td style="padding: 8px; text-align: right;">SUBTOTAL SERVIÇOS</td>
-                            <td style="padding: 8px; text-align: right; color: ${config.corPrimaria || '#e41616'};">R$ ${totalServicos.toFixed(2)}</td>
-                        </tr>
+                        ${linhasServicos || '<tr><td colspan="2" style="padding:10px; text-align:center; font-size:11px; color:#999;">-</td></tr>'}
                     </table>
                 </div>
-
             </div>
 
-            <!-- TOTAL GERAL -->
-            <div style="background: ${config.corPrimaria || '#e41616'}; color: white; padding: 15px; border-radius: 8px; text-align: right; margin-bottom: 40px;">
-                <span style="font-size: 14px; margin-right: 15px;">VALOR TOTAL DO ORÇAMENTO:</span>
-                <strong style="font-size: 24px;">R$ ${totalGeral.toFixed(2)}</strong>
+            <!-- TOTAIS -->
+            <div style="border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: flex-end;">
+                <div style="width: 250px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #666;">
+                        <span>Total Peças</span>
+                        <span>R$ ${totalPecas.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #666;">
+                        <span>Total Serviços</span>
+                        <span>R$ ${totalServicos.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 2px solid #333; font-size: 20px; font-weight: 800; color: #000;">
+                        <span>TOTAL</span>
+                        <span>R$ ${totalGeral.toFixed(2)}</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- TERMOS -->
-            <div style="font-size: 10px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
-                Orçamento válido por 7 dias. A aprovação deste orçamento autoriza a execução dos serviços descritos.
-                <br>Gerado via Sistema FastCar
+            <!-- FOOTER -->
+            <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; font-size: 10px; color: #999;">
+                Documento gerado digitalmente em ${new Date().toLocaleString('pt-BR')}
             </div>
 
         </div>
     `;
 
-    // Gerar PDF
+    // Configuração do PDF
     const opt = {
-        margin: [0, 0, 0, 0], // Margem zero, controlamos no CSS interno
-        filename: `orcamento_${placa}_${Date.now()}.pdf`,
+        margin: 0,
+        filename: `ORC_${placa}_${Date.now()}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true }, // Scale 2 para alta qualidade
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
+    // Gera o PDF a partir da string HTML (NÃO do elemento na tela)
+    // Isso garante que BOTOES NÃO APAREÇAM e o design seja EXATO
     html2pdf().set(opt).from(conteudoPDF).save().then(() => {
-        // PERGUNTA DO WHATSAPP
-        setTimeout(() => {
-            if (confirm("📄 PDF do Orçamento gerado!\n\nDeseja abrir o WhatsApp para enviar ao cliente agora?")) {
-                enviarWhatsApp('orcamento', totalGeral.toFixed(2));
-            }
-        }, 1000);
+        // Feedback
+        // setTimeout(() => alert('PDF Gerado com sucesso!'), 500);
     });
 }
 
+
 // ==========================================
-// WHATSAPP SHARE FEATURE
+// WHATSAPP SHARE FEATURE (CORRIGIDO)
 // ==========================================
 function enviarWhatsApp(tipo, valorTotal = '0,00') {
     const nome = document.getElementById('nomecliente')?.value || document.getElementById('nome_cliente')?.value || '';
@@ -1323,9 +1324,13 @@ function enviarWhatsApp(tipo, valorTotal = '0,00') {
     const nomeOficina = window.OFICINA_CONFIG ? window.OFICINA_CONFIG.nome : 'Nossa Oficina';
 
     if (!telefone) {
-        alert('⚠️ Preencha o Celular do Cliente para enviar.');
-        const el = document.getElementById('celularcliente') || document.getElementById('celular_cliente');
-        if (el) el.focus();
+        alert('⚠️ É necessário preencher o Celular do Cliente na aba "Dados do Cliente" para enviar.');
+        // Tenta focar no campo
+        const el1 = document.getElementById('celularcliente');
+        const el2 = document.getElementById('celular_cliente');
+        if (el1) el1.focus();
+        else if (el2) el2.focus();
+        else switchTab('step3'); // Vai para aba de dados 
         return;
     }
 
@@ -1333,9 +1338,11 @@ function enviarWhatsApp(tipo, valorTotal = '0,00') {
     const saudacao = obterSaudacao();
 
     if (tipo === 'orcamento') {
-        mensagem = `*${saudacao}, ${nome}! Tudo bem?* 👋\n\nSou da *${nomeOficina}*. Segue o orçamento do seu veículo:\n\n🚗 *Veículo:* ${modelo}\n🔠 *Placa:* ${placa.toUpperCase()}\n💰 *Total:* R$ ${valorTotal}\n\n📄 *O PDF detalhado está em anexo.*\n\nFico no aguardo da sua aprovação!`;
+        // MENSAGEM ESPECÍFICA DE ORÇAMENTO
+        mensagem = `*${saudacao} ${nome}! Tudo bem?* 👋\n\nSou da *${nomeOficina}*.\n\nPreparamos o orçamento do seu veículo (${modelo} - Placa ${placa.toUpperCase()}).\n\n💰 *Valor Total: R$ ${valorTotal}*\n\n📄 *O PDF detalhado com peças e serviços segue em anexo.*\n\nFico no aguardo!`;
     } else {
-        mensagem = `*${saudacao}, ${nome}! Tudo bem?* 👋\n\nSou da *${nomeOficina}*. Finalizamos a inspeção do seu veículo:\n\n🚗 *Veículo:* ${modelo}\n🔠 *Placa:* ${placa.toUpperCase()}\n\n📸 *As fotos e o relatório técnico estão em anexo.*\n\nQualquer dúvida, estou à disposição!`;
+        // MENSAGEM GERAL / CHECKLIST
+        mensagem = `*${saudacao} ${nome}! Tudo bem?* 👋\n\nSou da *${nomeOficina}*.\n\nFinalizamos a avaliação do seu veículo (${modelo} - Placa ${placa.toUpperCase()}).\n\n📋 *O Relatório Técnico e as Fotos seguem aqui.*\n\nDê uma olhadinha e me diga o que acha!`;
     }
 
     const url = `https://api.whatsapp.com/send?phone=55${telefone}&text=${encodeURIComponent(mensagem)}`;

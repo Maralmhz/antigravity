@@ -895,7 +895,8 @@ button {
 
     /* --- BARRA DE NAVEGAÇÃO INFERIOR (Estilo Instagram) --- */
     .bottom-nav {
-        display: none;
+        display: flex !important;
+        /* Força display no Mobile */
         /* Escondido por padrão (Desktop) */
         position: fixed;
         bottom: 0;
@@ -906,7 +907,6 @@ button {
         background: #ffffff;
         box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
         z-index: 10000;
-        display: flex;
         /* Garante flexbox */
         flex-direction: row;
         /* Garante linha */
@@ -1442,9 +1442,47 @@ screen {
 
 /* Também no print */
 @media print {
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: #fff !important;
+    }
+
+    /* ESCONDE TUDO QUE NÃO É CONTEÚDO NO PRINT */
+    button,
+    .btn-primary,
+    .btn-secondary,
+    .btn-success,
+    .btn-danger,
+    .btn-warning,
+    .action-buttons,
+    .actions-bar,
+    .bottom-nav,
+    .tabs,
+    .header-badge,
+    #admin-modal,
+    .wizard-buttons,
+    .wizard-progress,
+    .no-print,
+    .search-box,
+    .form-group input[type="file"],
+    .form-group label[for="uploadFotos"] {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
     .force-page-break {
         page-break-before: always !important;
         break-before: page !important;
+    }
+
+    .os-box {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
     }
 }
 
