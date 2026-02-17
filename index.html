@@ -692,31 +692,43 @@
                 <div id="containerTabelasOrcamento">
                 </div>
 
-                <div class="os-total-row">
+                <div class="total-row-final">
                     <span>TOTAL GERAL:</span>
-                    <span id="rTotalGeral" class="os-total-value">R$ 0,00</span>
+                    <span id="totalGeralFinal">R$ 0,00</span>
                 </div>
 
-                <div class="os-assinaturas" id="assinaturas-pag2">
-                    <div class="os-assina-box">Assinatura do Cliente</div>
-                    <div class="os-assina-box">Assinatura do Técnico</div>
+                <div class="actions-bar" style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button class="btn-primary" onclick="gerarPDFOrcamento()"
+                        style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📄 Gerar PDF Orçamento
+                    </button>
+                    <button class="btn-success"
+                        onclick="enviarWhatsApp('orcamento', document.getElementById('totalGeralFinal').textContent.replace('R$ ',''))"
+                        style="flex: 1; background-color: #25D366; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📱 WhatsApp
+                    </button>
                 </div>
-
-                <div class="os-footer">
-                    <span id="rodape-texto-2">Carregando...</span>
-                </div>
-
-
-
+            </div>
+            <div class="os-assinaturas" id="assinaturas-pag2">
+                <div class="os-assina-box">Assinatura do Cliente</div>
+                <div class="os-assina-box">Assinatura do Técnico</div>
             </div>
 
-            <div class="action-buttons no-pdf">
-                <button type="button" class="btn-success" onclick="gerarPDFResumo()">📥 Baixar PDF</button>
-                <button type="button" class="btn-primary" onclick="salvarChecklist()"
-                    style="background: #27ae60 !important;">💾 Salvar Completo</button>
+            <div class="os-footer">
+                <span id="rodape-texto-2">Carregando...</span>
             </div>
+
+
 
         </div>
+
+        <div class="action-buttons no-pdf">
+            <button type="button" class="btn-success" onclick="gerarPDFResumo()">📥 Baixar PDF</button>
+            <button type="button" class="btn-primary" onclick="salvarChecklist()"
+                style="background: #27ae60 !important;">💾 Salvar Completo</button>
+        </div>
+
+    </div>
     </div>
 
     <!-- CARREGA TODA A LÓGICA DO ARQUIVO EXTERNO -->
