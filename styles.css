@@ -906,6 +906,10 @@ button {
         background: #ffffff;
         box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
         z-index: 10000;
+        display: flex;
+        /* Garante flexbox */
+        flex-direction: row;
+        /* Garante linha */
         justify-content: space-around;
         align-items: center;
         border-top: 1px solid #dbdbdb;
