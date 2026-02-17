@@ -70,8 +70,9 @@ function criarModalConfig() {
                 </div>
             </div>
             <div class="admin-footer">
-                <button onclick="resetarConfig()" class="btn-danger">Restaurar Padrão</button>
-                <button onclick="salvarConfig()" class="btn-success">Salvar Alterações</button>
+                <button onclick="gerarLinkCliente()" style="margin-right:auto; background:#007bff; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">🔗 Copiar Link para Cliente</button>
+                <button onclick="resetarConfig()" class="btn-danger">Restaurar</button>
+                <button onclick="salvarConfig()" class="btn-success">Salvar</button>
             </div>
         </div>
     `;
