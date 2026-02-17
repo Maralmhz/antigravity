@@ -25,11 +25,11 @@ async function sincronizarChecklists() {
         if (modulo && modulo.buscarChecklistsNuvem) {
             btn.textContent = '⏳ Baixando...';
             const dadosNuvem = await modulo.buscarChecklistsNuvem();
-            
+
             if (dadosNuvem.length > 0) {
                 let local = JSON.parse(localStorage.getItem('checklists') || '[]');
                 const idsLocais = new Set(local.map(c => c.id));
-                
+
                 let novos = 0;
                 dadosNuvem.forEach(item => {
                     if (!idsLocais.has(item.id)) {
@@ -60,39 +60,39 @@ async function sincronizarChecklists() {
 let itensOrcamento = [];
 
 function adicionarItemManual() {
-  const descricaoInput = document.getElementById("descricaoItem");
-  const valorInput = document.getElementById("valorItem");
-  const tipo = document.querySelector('input[name="tipoItem"]:checked').value;
+    const descricaoInput = document.getElementById("descricaoItem");
+    const valorInput = document.getElementById("valorItem");
+    const tipo = document.querySelector('input[name="tipoItem"]:checked').value;
 
-  const descricao = (descricaoInput.value || "").trim();
-  const valorBruto = (valorInput.value || "").toString().trim();
-  const valor = valorBruto === "" ? 0 : parseFloat(valorBruto);
+    const descricao = (descricaoInput.value || "").trim();
+    const valorBruto = (valorInput.value || "").toString().trim();
+    const valor = valorBruto === "" ? 0 : parseFloat(valorBruto);
 
-  if (!descricao) {
-    alert("Informe a descrição do item.");
+    if (!descricao) {
+        alert("Informe a descrição do item.");
+        descricaoInput.focus();
+        return;
+    }
+
+    if (isNaN(valor) || valor < 0) {
+        alert("Informe um valor válido (0 ou maior).");
+        valorInput.focus();
+        return;
+    }
+
+    const item = {
+        id: Date.now(),
+        descricao,
+        valor,
+        tipo,
+    };
+
+    itensOrcamento.push(item);
+    renderizarTabela();
+
+    descricaoInput.value = "";
+    valorInput.value = "";
     descricaoInput.focus();
-    return;
-  }
-
-  if (isNaN(valor) || valor < 0) {
-    alert("Informe um valor válido (0 ou maior).");
-    valorInput.focus();
-    return;
-  }
-
-  const item = {
-    id: Date.now(),
-    descricao,
-    valor,
-    tipo,
-  };
-
-  itensOrcamento.push(item);
-  renderizarTabela();
-
-  descricaoInput.value = "";
-  valorInput.value = "";
-  descricaoInput.focus();
 }
 
 function removerItem(id) {
@@ -103,32 +103,32 @@ function removerItem(id) {
 function editarItem(id) {
     const item = itensOrcamento.find(i => i.id === id);
     if (!item) return;
-    
+
     document.getElementById('descricaoItem').value = item.descricao;
     document.getElementById('valorItem').value = item.valor;
     document.querySelector(`input[name="tipoItem"][value="${item.tipo}"]`).checked = true;
-    
+
     removerItem(id);
     alert('Item carregado para edição. Altere e clique ➕ Adicionar!');
 }
 
 function renderizarTabela() {
-  const tbodyPecas = document.getElementById("tabelaPecas");
-  const tbodyServicos = document.getElementById("tabelaServicos");
+    const tbodyPecas = document.getElementById("tabelaPecas");
+    const tbodyServicos = document.getElementById("tabelaServicos");
 
-  const elTotalPecas = document.getElementById("totalPecas");
-  const elTotalServicos = document.getElementById("totalServicos");
-  const elTotalGeral = document.getElementById("totalGeralFinal");
+    const elTotalPecas = document.getElementById("totalPecas");
+    const elTotalServicos = document.getElementById("totalServicos");
+    const elTotalGeral = document.getElementById("totalGeralFinal");
 
-  if (tbodyPecas) tbodyPecas.innerHTML = "";
-  if (tbodyServicos) tbodyServicos.innerHTML = "";
+    if (tbodyPecas) tbodyPecas.innerHTML = "";
+    if (tbodyServicos) tbodyServicos.innerHTML = "";
 
-  let somaPecas = 0;
-  let somaServicos = 0;
+    let somaPecas = 0;
+    let somaServicos = 0;
 
-  itensOrcamento.forEach((item) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
+    itensOrcamento.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
       <td style="border: 1px solid #ddd; padding: 6px;">${item.descricao}</td>
       <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">R$ ${Number(item.valor || 0).toFixed(2)}</td>
       <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">
@@ -137,23 +137,23 @@ function renderizarTabela() {
       </td>
     `;
 
-    if (item.tipo === "servico") {
-      somaServicos += Number(item.valor || 0);
-      if (tbodyServicos) tbodyServicos.appendChild(tr);
-    } else {
-      somaPecas += Number(item.valor || 0);
-      if (tbodyPecas) tbodyPecas.appendChild(tr);
-    }
-  });
+        if (item.tipo === "servico") {
+            somaServicos += Number(item.valor || 0);
+            if (tbodyServicos) tbodyServicos.appendChild(tr);
+        } else {
+            somaPecas += Number(item.valor || 0);
+            if (tbodyPecas) tbodyPecas.appendChild(tr);
+        }
+    });
 
-  const somaTotal = somaPecas + somaServicos;
+    const somaTotal = somaPecas + somaServicos;
 
-  if (elTotalPecas) elTotalPecas.textContent = `R$ ${somaPecas.toFixed(2)}`;
-  if (elTotalServicos) elTotalServicos.textContent = `R$ ${somaServicos.toFixed(2)}`;
-  if (elTotalGeral) elTotalGeral.textContent = `R$ ${somaTotal.toFixed(2)}`;
-  
-  const rTotalGeral = document.getElementById("rTotalGeral");
-  if (rTotalGeral) rTotalGeral.textContent = `R$ ${somaTotal.toFixed(2)}`;
+    if (elTotalPecas) elTotalPecas.textContent = `R$ ${somaPecas.toFixed(2)}`;
+    if (elTotalServicos) elTotalServicos.textContent = `R$ ${somaServicos.toFixed(2)}`;
+    if (elTotalGeral) elTotalGeral.textContent = `R$ ${somaTotal.toFixed(2)}`;
+
+    const rTotalGeral = document.getElementById("rTotalGeral");
+    if (rTotalGeral) rTotalGeral.textContent = `R$ ${somaTotal.toFixed(2)}`;
 }
 
 // ==========================================
@@ -161,16 +161,32 @@ function renderizarTabela() {
 // ==========================================
 
 function switchTab(tabId) {
+    // 1. Esconde todo conteúdo e remove 'active' das abas antigas
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+
+    // 2. Mostra o conteúdo da aba selecionada
+    const tabContent = document.getElementById(tabId);
+    if (tabContent) tabContent.classList.add('active');
+
+    // 3. Atualiza abas superiores (Desktop)
     document.querySelectorAll('.tab-button').forEach(btn => {
-        if (btn.getAttribute('onclick').includes(tabId)) btn.classList.add('active');
+        if (btn.getAttribute('onclick')?.includes(tabId)) btn.classList.add('active');
     });
 
+    // 4. Atualiza navegação inferior (Mobile)
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('active'); // Limpa todos
+        if (btn.getAttribute('onclick')?.includes(tabId)) btn.classList.add('active'); // Ativa o correto
+    });
+
+    // 5. Ações específicas de cada aba
     if (tabId === 'historico') carregarHistorico();
     if (tabId === 'relatorios') atualizarRelatorios();
     if (tabId === 'orcamento') atualizarResumoVeiculo();
+
+    // Scroll para o topo suavemente ao mudar de aba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function salvarChecklist() {
@@ -202,11 +218,11 @@ async function salvarChecklist() {
         data_criacao: new Date().toISOString(),
         ...formData
     };
-    
+
     // Salva peças e serviços
     checklist.itensOrcamento = itensOrcamento || [];
     checklist.complexidade = document.getElementById('complexidade')?.value || '';
-    
+
     // 1. SALVAR LOCALMENTE (SEMPRE)
     let checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
     checklists.push(checklist);
@@ -215,11 +231,11 @@ async function salvarChecklist() {
     // Feedback Visual
     const btnSalvar = document.querySelector('button[onclick="salvarChecklist()"]');
     const txtOriginal = btnSalvar ? btnSalvar.textContent : "Salvar";
-    if(btnSalvar) {
+    if (btnSalvar) {
         btnSalvar.textContent = "☁️ Salvando Nuvem...";
         btnSalvar.disabled = true;
     }
-    
+
     // 2. TENTAR SALVAR NA NUVEM
     let msgExtra = "";
     try {
@@ -229,7 +245,7 @@ async function salvarChecklist() {
         console.warn("Falha nuvem:", e);
         msgExtra = ".\n\n⚠️ AVISO: Salvo APENAS LOCALMENTE.\nErro ao salvar na nuvem: " + (e.message || "Erro desconhecido");
     } finally {
-        if(btnSalvar) {
+        if (btnSalvar) {
             btnSalvar.textContent = txtOriginal;
             btnSalvar.disabled = false;
         }
@@ -261,7 +277,7 @@ function carregarHistorico() {
 
     checklists.slice().reverse().forEach(item => {
         const dataFormatada = new Date(item.data_criacao).toLocaleDateString('pt-BR');
-        const horaFormatada = new Date(item.data_criacao).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        const horaFormatada = new Date(item.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         const card = document.createElement('div');
         card.className = 'checklist-item';
@@ -289,8 +305,8 @@ function carregarChecklist(id) {
 
     if (item.nome_cliente && !item.nomecliente) item.nomecliente = item.nome_cliente;
 
-    const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).value = val || ''; }
-    
+    const setVal = (id, val) => { if (document.getElementById(id)) document.getElementById(id).value = val || ''; }
+
     setVal('nomecliente', item.nomecliente);
     setVal('cpfcnpj', item.cpf_cnpj || item.cpfcnpj);
     setVal('celularcliente', item.telefone || item.contato || item.celularcliente);
@@ -309,11 +325,11 @@ function carregarChecklist(id) {
     if (item.caracteristicas) item.caracteristicas.forEach(val => marcarCheckbox('caracteristicas', val));
     if (item.cambio) item.cambio.forEach(val => marcarCheckbox('cambio', val));
     if (item.tracao) item.tracao.forEach(val => marcarCheckbox('tracao', val));
-    
+
     itensOrcamento = item.itensOrcamento || [];
-    if(document.getElementById('complexidade')) document.getElementById('complexidade').value = item.complexidade || '';
+    if (document.getElementById('complexidade')) document.getElementById('complexidade').value = item.complexidade || '';
     renderizarTabela();
-    
+
     atualizarResumoVeiculo();
 }
 
@@ -353,7 +369,7 @@ function filtrarChecklists() {
 
     filtrados.slice().reverse().forEach(item => {
         const dataFormatada = new Date(item.data_criacao).toLocaleDateString('pt-BR');
-        const horaFormatada = new Date(item.data_criacao).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        const horaFormatada = new Date(item.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         const card = document.createElement('div');
         card.className = 'checklist-item';
@@ -436,7 +452,7 @@ function atualizarRelatorios() {
         marcas[m] = (marcas[m] || 0) + 1;
     });
 
-    const sortedMarcas = Object.entries(marcas).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    const sortedMarcas = Object.entries(marcas).sort((a, b) => b[1] - a[1]).slice(0, 5);
     let htmlGrafico = '';
     sortedMarcas.forEach(([marca, qtd]) => {
         const pct = (qtd / db.length) * 100;
@@ -470,7 +486,7 @@ function atualizarResumoVeiculo() {
     const vComb = document.getElementById('combustivel')?.value || '-';
     const vComplex = document.getElementById('complexidade')?.value || '-';
 
-    const setContent = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val; }
+    const setContent = (id, val) => { if (document.getElementById(id)) document.getElementById(id).textContent = val; }
 
     setContent('resumoPlaca', vPlaca);
     setContent('resumoModelo', vModelo);
@@ -496,152 +512,171 @@ let streamCamera = null;
 let fotosVeiculo = JSON.parse(localStorage.getItem('fotosVeiculo') || '[]');
 
 function iniciarCamera() {
-  const video = document.getElementById('cameraPreview');
-  const btnTirar = document.getElementById('btnTirarFoto');
-  const container = document.querySelector('.camera-container');
+    const video = document.getElementById('cameraPreview');
+    const btnTirar = document.getElementById('btnTirarFoto');
+    const container = document.querySelector('.camera-container');
 
-  container.style.display = 'block';
-  btnTirar.style.display = 'inline-block';
-  btnTirar.disabled = true;
+    container.style.display = 'block';
+    btnTirar.style.display = 'inline-block';
+    btnTirar.disabled = true;
 
-  if (navigator.geolocation) {
-    try { navigator.geolocation.getCurrentPosition(() => {}, () => {}, { timeout: 800 }); } catch(e) {}
-  }
+    if (navigator.geolocation) {
+        try { navigator.geolocation.getCurrentPosition(() => { }, () => { }, { timeout: 800 }); } catch (e) { }
+    }
 
-  navigator.mediaDevices.getUserMedia({
-    video: {
-      facingMode: { ideal: 'environment' },
-      width: { ideal: 1280 },
-      height: { ideal: 720 }
-    },
-    audio: false
-  }).then((stream) => {
-    streamCamera = stream;
-    video.srcObject = stream;
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1920 }, // Melhora resolução
+            height: { ideal: 1080 }
+        },
+        audio: false
+    }).then((stream) => {
+        streamCamera = stream;
+        video.srcObject = stream;
 
-    const habilitar = () => {
-      if (video.videoWidth && video.videoHeight) btnTirar.disabled = false;
-    };
+        // Ajuste CSS dinâmico para tela cheia na câmera
+        if (window.innerWidth < 768) {
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+            container.style.zIndex = '11000';
+            container.style.background = '#000';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
 
-    video.onloadedmetadata = () => {
-      habilitar();
-      const p = video.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    };
+            video.style.maxWidth = '100%';
+            video.style.maxHeight = '80vh';
+            video.style.borderRadius = '0';
+        }
 
-    video.oncanplay = () => habilitar();
-    setTimeout(habilitar, 600); // fallback
-  }).catch(err => {
-    container.style.display = 'none';
-    btnTirar.style.display = 'none';
-    alert('Erro câmera: ' + err.message + '\nUse "Galeria"');
-  });
+        const habilitar = () => {
+            if (video.videoWidth && video.videoHeight) btnTirar.disabled = false;
+        };
+
+        video.onloadedmetadata = () => {
+            habilitar();
+            const p = video.play();
+            if (p && typeof p.catch === 'function') p.catch(() => { });
+        };
+
+        video.oncanplay = () => habilitar();
+        setTimeout(habilitar, 600); // fallback
+    }).catch(err => {
+        container.style.display = 'none';
+        btnTirar.style.display = 'none';
+        alert('Erro câmera: ' + err.message + '\nUse "Galeria"');
+    });
 }
 
 function tirarFoto(tentativa = 0) {
-  const video = document.getElementById('cameraPreview');
+    const video = document.getElementById('cameraPreview');
 
-  if (!video.videoWidth || !video.videoHeight) {
-    if (tentativa < 10) {
-      setTimeout(() => tirarFoto(tentativa + 1), 120);
-      return;
+    if (!video.videoWidth || !video.videoHeight) {
+        if (tentativa < 10) {
+            setTimeout(() => tirarFoto(tentativa + 1), 120);
+            return;
+        }
+        alert('A câmera ainda está carregando. Aguarde 1 segundo e tente novamente.');
+        return;
     }
-    alert('A câmera ainda está carregando. Aguarde 1 segundo e tente novamente.');
-    return;
-  }
 
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
 
-  adicionarMarcaDagua(canvas, () => {
-    const foto = {
-      id: Date.now(),
-      dataURL: canvas.toDataURL('image/jpeg', 0.82),
-      data: new Date().toLocaleString('pt-BR'),
-      legenda: ''
-    };
+    adicionarMarcaDagua(canvas, () => {
+        const foto = {
+            id: Date.now(),
+            dataURL: canvas.toDataURL('image/jpeg', 0.82),
+            data: new Date().toLocaleString('pt-BR'),
+            legenda: ''
+        };
 
-    fotosVeiculo.unshift(foto);
-    if (fotosVeiculo.length > 15) fotosVeiculo = fotosVeiculo.slice(0, 15);
-    localStorage.setItem('fotosVeiculo', JSON.stringify(fotosVeiculo));
-    renderizarGaleria();
-    pararCamera();
-  });
+        fotosVeiculo.unshift(foto);
+        if (fotosVeiculo.length > 15) fotosVeiculo = fotosVeiculo.slice(0, 15);
+        localStorage.setItem('fotosVeiculo', JSON.stringify(fotosVeiculo));
+        renderizarGaleria();
+        pararCamera();
+    });
 }
 
 function obterTextoMarcaDagua(timeoutMs = 1500) {
-  const dataHora = new Date().toLocaleString('pt-BR');
+    const dataHora = new Date().toLocaleString('pt-BR');
 
-  if (!navigator.geolocation) return Promise.resolve(dataHora);
+    if (!navigator.geolocation) return Promise.resolve(dataHora);
 
-  return new Promise((resolve) => {
-    let finalizado = false;
-    const finalizar = (texto) => {
-      if (finalizado) return;
-      finalizado = true;
-      resolve(texto);
-    };
+    return new Promise((resolve) => {
+        let finalizado = false;
+        const finalizar = (texto) => {
+            if (finalizado) return;
+            finalizado = true;
+            resolve(texto);
+        };
 
-    const timer = setTimeout(() => finalizar(dataHora), timeoutMs);
+        const timer = setTimeout(() => finalizar(dataHora), timeoutMs);
 
-    try {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          clearTimeout(timer);
-          const lat = pos.coords.latitude.toFixed(4);
-          const lng = pos.coords.longitude.toFixed(4);
-          finalizar(`${dataHora} | ${lat}, ${lng}`);
-        },
-        () => {
-          clearTimeout(timer);
-          finalizar(dataHora);
-        },
-        { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 5 * 60 * 1000 }
-      );
-    } catch (e) {
-      clearTimeout(timer);
-      finalizar(dataHora);
-    }
-  });
+        try {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    clearTimeout(timer);
+                    const lat = pos.coords.latitude.toFixed(4);
+                    const lng = pos.coords.longitude.toFixed(4);
+                    finalizar(`${dataHora} | ${lat}, ${lng}`);
+                },
+                () => {
+                    clearTimeout(timer);
+                    finalizar(dataHora);
+                },
+                { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 5 * 60 * 1000 }
+            );
+        } catch (e) {
+            clearTimeout(timer);
+            finalizar(dataHora);
+        }
+    });
 }
 
 function adicionarMarcaDagua(canvas, callback) {
-  const ctx = canvas.getContext('2d');
-  obterTextoMarcaDagua(1500).then((texto) => {
-    desenharTexto(ctx, canvas.width, canvas.height, texto);
-    callback();
-  });
+    const ctx = canvas.getContext('2d');
+    obterTextoMarcaDagua(1500).then((texto) => {
+        desenharTexto(ctx, canvas.width, canvas.height, texto);
+        callback();
+    });
 }
 
 function desenharTexto(ctx, w, h, texto) {
-  const base = Math.min(w, h);
-  const fontSize = Math.max(14, Math.min(22, Math.round(base * 0.018)));
+    const base = Math.min(w, h);
+    const fontSize = Math.max(14, Math.min(22, Math.round(base * 0.018)));
 
-  const padX = Math.round(fontSize * 0.8);
-  const padY = Math.round(fontSize * 0.55);
+    const padX = Math.round(fontSize * 0.8);
+    const padY = Math.round(fontSize * 0.55);
 
-  ctx.save();
-  ctx.font = `600 ${fontSize}px Arial`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'bottom';
+    ctx.save();
+    ctx.font = `600 ${fontSize}px Arial`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
 
-  const x = 20;
-  const y = h - 20;
+    const x = 20;
+    const y = h - 20;
 
-  const textWidth = ctx.measureText(texto).width;
-  const boxW = textWidth + padX * 2;
-  const boxH = fontSize + padY * 2;
+    const textWidth = ctx.measureText(texto).width;
+    const boxW = textWidth + padX * 2;
+    const boxH = fontSize + padY * 2;
 
-  ctx.fillStyle = 'rgba(0,0,0,0.45)';
-  ctx.fillRect(x - padX, y - fontSize - padY, boxW, boxH);
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(x - padX, y - fontSize - padY, boxW, boxH);
 
-  ctx.fillStyle = '#fff';
-  ctx.fillText(texto, x, y);
-  ctx.restore();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(texto, x, y);
+    ctx.restore();
 }
 
 function pararCamera() {
@@ -657,7 +692,7 @@ function adicionarFotos(event) {
     const files = Array.from(event.target.files);
     const processarArquivo = (index) => {
         if (index >= files.length) return;
-        
+
         const file = files[index];
         const reader = new FileReader();
         reader.onload = e => {
@@ -668,9 +703,9 @@ function adicionarFotos(event) {
                 canvas.height = img.height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
-                
+
                 adicionarMarcaDagua(canvas, () => {
-                   fotosVeiculo.unshift({
+                    fotosVeiculo.unshift({
                         id: Date.now() + Math.random(),
                         dataURL: canvas.toDataURL('image/jpeg', 0.82),
                         data: new Date().toLocaleString('pt-BR'),
@@ -694,12 +729,12 @@ function renderizarGaleria() {
     const galeria = document.getElementById('galeriaFotos');
     if (!galeria) return;
     galeria.innerHTML = '';
-    
+
     if (fotosVeiculo.length === 0) {
         galeria.innerHTML = '<p style="text-align:center;color:#999;padding:40px">📭 Nenhuma foto</p>';
         return;
     }
-    
+
     fotosVeiculo.slice(0, 15).forEach((foto, index) => {
         const div = document.createElement('div');
         div.className = 'foto-item';
@@ -714,7 +749,7 @@ function renderizarGaleria() {
         `;
         galeria.appendChild(div);
     });
-    
+
     galeria.querySelectorAll('.foto-zoom').forEach(btn => {
         btn.addEventListener('click', () => abrirFotoGrande(btn.dataset.url));
     });
@@ -770,7 +805,7 @@ function gerarPDFFotos() {
         return;
     }
 
-    const placa  = document.getElementById('placa')?.value  || 'SEM_PLACA';
+    const placa = document.getElementById('placa')?.value || 'SEM_PLACA';
     const modelo = document.getElementById('modelo')?.value || 'SEM_MODELO';
     const chassi = document.getElementById('chassi')?.value || 'SEM_CHASSI';
 
@@ -823,11 +858,11 @@ function gerarNumeroOS() {
     const placa = (document.getElementById('placa')?.value || 'OS').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     let dataRaw = document.getElementById('data')?.value;
     let dataObj = dataRaw ? new Date(dataRaw + 'T00:00:00') : new Date();
-    
+
     const dia = String(dataObj.getDate()).padStart(2, '0');
     const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
     const ano = String(dataObj.getFullYear()).slice(-2);
-    
+
     return `${placa}-${dia}-${mes}-${ano}`;
 }
 
@@ -841,7 +876,7 @@ function atualizarResumoOS() {
     // Cabeçalho
     const logoSrc = document.getElementById('logo-oficina')?.src;
     if (logoSrc) document.getElementById('logoResumo').src = logoSrc;
-    
+
     document.getElementById('nomeOficinaResumo').textContent = document.getElementById('nome-oficina')?.textContent || 'OFICINA';
     document.getElementById('enderecoOficinaResumo').textContent = document.getElementById('endereco-oficina')?.textContent || '';
     document.getElementById('telefoneOficinaResumo').textContent = document.getElementById('telefone-oficina')?.textContent || '';
@@ -856,7 +891,7 @@ function atualizarResumoOS() {
     document.getElementById('rPlaca').textContent = (document.getElementById('placa')?.value || '-').toUpperCase();
     document.getElementById('rChassi').textContent = document.getElementById('chassi')?.value || '-';
     document.getElementById('rKmEntrada').textContent = (document.getElementById('km_entrada')?.value || '') + ' km';
-    
+
     let combSelect = document.getElementById('combustivel');
     let combTexto = combSelect && combSelect.selectedIndex >= 0 ? combSelect.options[combSelect.selectedIndex].text : '-';
     document.getElementById('rCombustivel').textContent = combTexto;
@@ -865,13 +900,13 @@ function atualizarResumoOS() {
     let horaVal = document.getElementById('hora')?.value;
     let dataFmt = dataVal ? dataVal.split('-').reverse().join('/') : '--/--/----';
     document.getElementById('rEntradaDataHora').textContent = `${dataFmt} às ${horaVal || '--:--'}`;
-    
+
     document.getElementById('rServicos').textContent = document.getElementById('servicos')?.value || '-';
     document.getElementById('rObsInspecao').textContent = document.getElementById('obsInspecao')?.value || '-';
 
     // Checklist
     const areaBadges = document.getElementById('rChecklistBadges');
-    areaBadges.innerHTML = ''; 
+    areaBadges.innerHTML = '';
     const checkboxesMarcados = document.querySelectorAll('#checklistForm input[type="checkbox"]:checked');
 
     if (checkboxesMarcados.length === 0) {
@@ -881,7 +916,7 @@ function atualizarResumoOS() {
             let textoLabel = cb.value;
             let labelTag = document.querySelector(`label[for="${cb.id}"]`);
             if (labelTag) textoLabel = labelTag.textContent;
-            
+
             let span = document.createElement('span');
             const palavrasRuim = ['TRINCADO', 'AMASSADO', 'RISCADO', 'QUEBRADO', 'DANIFICADO', 'FALTANDO', 'RUIM'];
             const ehRuim = palavrasRuim.some(p => textoLabel.toUpperCase().includes(p));
@@ -895,14 +930,14 @@ function atualizarResumoOS() {
     // Tabelas Orçamento
     const containerTabelas = document.getElementById('containerTabelasOrcamento');
     containerTabelas.innerHTML = '';
-    
+
     const pecasTodas = itensOrcamento.filter(i => i.tipo !== 'servico');
     const servicosTodos = itensOrcamento.filter(i => i.tipo === 'servico');
-    
+
     const divGrid = document.createElement('div');
     divGrid.className = 'os-grid-2 mt-10';
     divGrid.style.gap = '18px';
-    
+
     const geraTabela = (titulo, itens, cor) => `
         <div class="os-table-header" style="border-bottom: 2px solid ${cor}">${titulo}</div>
         <table class="os-table" style="border: 2px solid ${cor}; border-radius: 6px; width:100%; border-collapse:collapse;">
@@ -911,7 +946,7 @@ function atualizarResumoOS() {
         </table>
         <div style="display:flex;justify-content:space-between;margin-top:8px;padding:8px 10px;border:1px solid ${cor};border-radius:6px;">
             <strong style="color:${cor};">TOTAL ${titulo}</strong>
-            <span style="font-weight:700;color:${cor};">R$ ${itens.reduce((a,b)=>a+b.valor,0).toFixed(2)}</span>
+            <span style="font-weight:700;color:${cor};">R$ ${itens.reduce((a, b) => a + b.valor, 0).toFixed(2)}</span>
         </div>
     `;
 
@@ -930,29 +965,29 @@ function atualizarResumoOS() {
     const rod2 = document.getElementById('rodape-texto-2');
     if (rod1) rod1.textContent = textoRodape;
     if (rod2) rod2.textContent = textoRodape;
-    
+
     // Header Pág 2
     const headerPag2 = document.getElementById('header-pag2');
-    if(headerPag2) headerPag2.innerHTML = document.getElementById('template-cabecalho').innerHTML;
+    if (headerPag2) headerPag2.innerHTML = document.getElementById('template-cabecalho').innerHTML;
 }
 
 function gerarPDFResumo() {
-  atualizarResumoOS();
-  document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
-  const elemento = document.getElementById('resumoContainer');
+    atualizarResumoOS();
+    document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
+    const elemento = document.getElementById('resumoContainer');
 
-  const opt = {
-    margin: [10, 10, 10, 10],
-    filename: `OS-${(document.getElementById('placa')?.value || '').toUpperCase()}_CHECKLIST.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, scrollY: 0, backgroundColor: '#ffffff' },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css', 'legacy'] }
-  };
+    const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `OS-${(document.getElementById('placa')?.value || '').toUpperCase()}_CHECKLIST.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+    };
 
-  html2pdf().set(opt).from(elemento).save()
-    .then(() => { document.querySelectorAll('.no-pdf').forEach(el => el.style.display = ''); })
-    .catch(() => { document.querySelectorAll('.no-pdf').forEach(el => el.style.display = ''); });
+    html2pdf().set(opt).from(elemento).save()
+        .then(() => { document.querySelectorAll('.no-pdf').forEach(el => el.style.display = ''); })
+        .catch(() => { document.querySelectorAll('.no-pdf').forEach(el => el.style.display = ''); });
 }
 
 function gerarPDF() {
@@ -970,7 +1005,7 @@ function gerarPDF() {
 
     const botoes = document.querySelectorAll('button, .tabs, .header-badge, .action-buttons');
     botoes.forEach(btn => btn.style.display = 'none');
-    
+
     const rodape = document.querySelector('.os-footer');
     rodape.style.display = 'block !important';
 
@@ -1025,37 +1060,37 @@ function nextStep(step) {
 function prevStep(step) { showStep(step); }
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderizarGaleria();
-  atualizarBarraOS();
+    renderizarGaleria();
+    atualizarBarraOS();
 
-  const descricaoItem = document.getElementById("descricaoItem");
-  const valorItem = document.getElementById("valorItem");
+    const descricaoItem = document.getElementById("descricaoItem");
+    const valorItem = document.getElementById("valorItem");
 
-  if (descricaoItem) {
-    descricaoItem.addEventListener("keydown", function (event) {
-      if (event.key !== "Enter" || event.shiftKey) return;
-      event.preventDefault();
-      if (valorItem) valorItem.focus();
+    if (descricaoItem) {
+        descricaoItem.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" || event.shiftKey) return;
+            event.preventDefault();
+            if (valorItem) valorItem.focus();
+        });
+    }
+
+    if (valorItem) {
+        valorItem.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            adicionarItemManual();
+            setTimeout(() => descricaoItem && descricaoItem.focus(), 0);
+        });
+    }
+
+    const camposMonitorados = ['placa', 'modelo', 'chassi', 'km_entrada', 'data', 'hora', 'combustivel', 'complexidade'];
+    camposMonitorados.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarResumoVeiculo);
     });
-  }
 
-  if (valorItem) {
-    valorItem.addEventListener("keydown", function (event) {
-      if (event.key !== "Enter") return;
-      event.preventDefault();
-      adicionarItemManual();
-      setTimeout(() => descricaoItem && descricaoItem.focus(), 0);
-    });
-  }
-  
-  const camposMonitorados = ['placa', 'modelo', 'chassi', 'km_entrada', 'data', 'hora', 'combustivel', 'complexidade'];
-  camposMonitorados.forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.addEventListener('input', atualizarResumoVeiculo);
-  });
-  
-  document.getElementById('placa')?.addEventListener('input', atualizarBarraOS);
-  document.getElementById('data')?.addEventListener('input', atualizarBarraOS);
+    document.getElementById('placa')?.addEventListener('input', atualizarBarraOS);
+    document.getElementById('data')?.addEventListener('input', atualizarBarraOS);
 });
 
 if ('serviceWorker' in navigator) {

@@ -647,6 +647,29 @@
 <script src="app.js"></script>
 <script src="checklist.js"></script>
     
+<div class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('novo-checklist')">
+        <span class="nav-icon">➕</span>
+        <span class="nav-label">Novo</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('orcamento')">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Orçamento</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('fotos')">
+        <span class="nav-icon">📸</span>
+        <span class="nav-label">Fotos</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('resumo'); atualizarResumoOS()">
+        <span class="nav-icon">📄</span>
+        <span class="nav-label">Resumo</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('historico')">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Histórico</span>
+    </button>
+</div>
+    
 <div class="os-footer" id="rRodape" style="position: fixed; bottom: 0; left: 0; right: 0; width: 100%; text-align: center; font-size: 10px; background: #f8f9fa; padding: 8px 12px; border-top: 2px solid var(--color-primary); z-index: 9999; box-sizing: border-box; font-family: Arial, sans-serif;">
     <span id="rodape-texto">Developed by Hallz Branding 3199676-6963</span>
 </div>
