@@ -1168,5 +1168,183 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('data:application/javascript;base64,CmNvbnN0IENBQ0hFX05BTUUgPSAnY2hlY2tsaXN0LXYzLWNhY2hlJzsKY29uc3QgVVJMU19UT19DQUNIRSA9IFsKICAnLycsCiAgJy9pbmRleC5odG1sJwpdOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgKGV2ZW50KSA9PiB7CiAgY29uc3QgY2FjaGVPcGVuID0gY2FjaGVzLm9wZW4oQ0FDSEVfTkFNRSkudGhlbigY2xpZW50KSA9PiB7CiAgICByZXR1cm4gY2xpZW50LmFkZEFsbChVUkxzX1RPX0NBQ0hFKTsKICB9KTsKICBldmVudC53YWl0VW50aWwoKGNhY2hlT3Blbik7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIChldmVudCkgPT4gewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpLnRoZW4oKHJlc3BvbnNlKSA9PiB7CiAgICAgIGlmIChyZXNwb25zZSkgewogICAgICAgIHJldHVybiByZXNwb25zZTsKICAgICAgfQogICAgICByZXR1cm4gZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICB9KQogICk7Cn0pOwo=');
+    navigator.serviceWorker.register('data:application/javascript;base64,CmNvbnN0IENBQ0hFX05BTUUgPSAnY2hlY2tsaXN0LXYzLWNhY2hlJzsKY29uc3QgVVJMU19UT19DQUNIRSA9IFsKICAnLycsCiAgJy9pbmRleC5odG1sJwpdOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgKGV2ZW50KSA9PiB7CiAgY29uc3QgY2FjaGVPcGVuID0gY2FjaGVzLm9wZW4oQ0FDSEVfTkFNRSkudGhlbigYY2xpZW50KSA9PiB7CiAgICByZXR1cm4gY2xpZW50LmFkZEFsbChVUkxzX1RPX0NBQ0hFKTsKICB9KTsKICBldmVudC53YWl0VW50aWwoKGNhY2hlT3Blbik7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIChldmVudKkgPT4gewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpLnRoZW4oKHJlc3BvbnNlKSA9PiB7CiAgICAgIGlmIChyZXNwb25zZSkgewogICAgICAgIHJldHVybiByZXNwb25zZTsKICAgICAgfQogICAgICByZXR1cm4gZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICB9KQogICk7Cn0pOwo=');
+}
+
+// ==========================================
+// PDF ORÇAMENTO (DEALERSHIP STYLE)
+// ==========================================
+function gerarPDFOrcamento() {
+    if (itensOrcamento.length === 0) {
+        alert('⚠️ Adicione itens ao orçamento antes de gerar o PDF.');
+        return;
+    }
+
+    const config = window.OFICINA_CONFIG || {};
+    const cliente = document.getElementById('nomecliente')?.value || 'NÃO INFORMADO';
+    const placa = document.getElementById('placa')?.value || '---';
+    const modelo = document.getElementById('modelo')?.value || '---';
+    const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+    // Cálculos
+    let totalPecas = 0;
+    let totalServicos = 0;
+
+    const linhasPecas = itensOrcamento.filter(i => i.tipo !== 'servico').map(item => {
+        totalPecas += item.valor;
+        return `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 8px; font-size: 12px;">${item.descricao}</td>
+                <td style="padding: 8px; font-size: 12px; text-align: right;">R$ ${item.valor.toFixed(2)}</td>
+            </tr>`;
+    }).join('');
+
+    const linhasServicos = itensOrcamento.filter(i => i.tipo === 'servico').map(item => {
+        totalServicos += item.valor;
+        return `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 8px; font-size: 12px;">${item.descricao}</td>
+                <td style="padding: 8px; font-size: 12px; text-align: right;">R$ ${item.valor.toFixed(2)}</td>
+            </tr>`;
+    }).join('');
+
+    const totalGeral = totalPecas + totalServicos;
+
+    const conteudoPDF = `
+        <div style="font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; color: #333;">
+            
+            <!-- CABEÇALHO -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid ${config.corPrimaria || '#e41616'}; padding-bottom: 20px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    ${config.logo ? `<img src="${config.logo}" style="height: 60px; object-fit: contain;">` : ''}
+                    <div>
+                        <h1 style="margin: 0; font-size: 24px; color: ${config.corPrimaria || '#e41616'}; text-transform: uppercase;">${config.nome || 'NOME DA OFICINA'}</h1>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                            ${config.subtitulo || ''}<br>
+                            ${config.endereco || ''}<br>
+                            ${config.telefone || ''}
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="margin: 0; font-size: 30px; color: #333;">ORÇAMENTO</h2>
+                    <p style="margin: 5px 0 0; font-size: 14px; color: #666;">Data: ${dataHoje}</p>
+                </div>
+            </div>
+
+            <!-- DADOS DO CLIENTE/VEÍCULO -->
+            <div style="background: #f8f9fa; border: 1px solid #ddd; border-top: 3px solid #333; padding: 15px; display: flex; justify-content: space-between; margin-bottom: 30px;">
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <strong>CLIENTE:</strong><br>
+                    <span style="font-size: 14px;">${cliente}</span>
+                </div>
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <strong>VEÍCULO:</strong><br>
+                    <span style="font-size: 14px;">${modelo}</span>
+                </div>
+                <div style="font-size: 12px; line-height: 1.6;">
+                    <strong>PLACA:</strong><br>
+                    <span style="background: #ddd; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 14px;">${placa.toUpperCase()}</span>
+                </div>
+            </div>
+
+            <!-- TABELAS LADO A LADO -->
+            <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+                
+                <!-- PEÇAS -->
+                <div style="flex: 1;">
+                    <h3 style="background: #eee; padding: 8px; margin: 0 0 10px; font-size: 14px; border-left: 4px solid #666;">📦 PEÇAS</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        ${linhasPecas || '<tr><td colspan="2" style="padding:10px; text-align:center; font-size:12px; color:#999;">Nenhuma peça</td></tr>'}
+                        <tr style="background: #f9f9f9; font-weight: bold;">
+                            <td style="padding: 8px; text-align: right;">SUBTOTAL PEÇAS</td>
+                            <td style="padding: 8px; text-align: right; color: ${config.corPrimaria || '#e41616'};">R$ ${totalPecas.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- SERVIÇOS -->
+                <div style="flex: 1;">
+                    <h3 style="background: #eee; padding: 8px; margin: 0 0 10px; font-size: 14px; border-left: 4px solid #666;">🔧 SERVIÇOS (Mão de Obra)</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        ${linhasServicos || '<tr><td colspan="2" style="padding:10px; text-align:center; font-size:12px; color:#999;">Nenhum serviço</td></tr>'}
+                        <tr style="background: #f9f9f9; font-weight: bold;">
+                            <td style="padding: 8px; text-align: right;">SUBTOTAL SERVIÇOS</td>
+                            <td style="padding: 8px; text-align: right; color: ${config.corPrimaria || '#e41616'};">R$ ${totalServicos.toFixed(2)}</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- TOTAL GERAL -->
+            <div style="background: ${config.corPrimaria || '#e41616'}; color: white; padding: 15px; border-radius: 8px; text-align: right; margin-bottom: 40px;">
+                <span style="font-size: 14px; margin-right: 15px;">VALOR TOTAL DO ORÇAMENTO:</span>
+                <strong style="font-size: 24px;">R$ ${totalGeral.toFixed(2)}</strong>
+            </div>
+
+            <!-- TERMOS -->
+            <div style="font-size: 10px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
+                Orçamento válido por 7 dias. A aprovação deste orçamento autoriza a execução dos serviços descritos.
+                <br>Gerado via Sistema FastCar
+            </div>
+
+        </div>
+    `;
+
+    // Gerar PDF
+    const opt = {
+        margin: [0, 0, 0, 0], // Margem zero, controlamos no CSS interno
+        filename: `orcamento_${placa}_${Date.now()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(conteudoPDF).save().then(() => {
+        // PERGUNTA DO WHATSAPP
+        setTimeout(() => {
+            if (confirm("📄 PDF do Orçamento gerado!\n\nDeseja abrir o WhatsApp para enviar ao cliente agora?")) {
+                enviarWhatsApp('orcamento', totalGeral.toFixed(2));
+            }
+        }, 1000);
+    });
+}
+
+// ==========================================
+// WHATSAPP SHARE FEATURE
+// ==========================================
+function enviarWhatsApp(tipo, valorTotal = '0,00') {
+    const nome = document.getElementById('nomecliente')?.value || document.getElementById('nome_cliente')?.value || '';
+    const placa = document.getElementById('placa')?.value || '';
+    const modelo = document.getElementById('modelo')?.value || '';
+    const celular = document.getElementById('celularcliente')?.value || document.getElementById('celular_cliente')?.value || '';
+    const telefone = celular.replace(/\D/g, '');
+    const nomeOficina = window.OFICINA_CONFIG ? window.OFICINA_CONFIG.nome : 'Nossa Oficina';
+
+    if (!telefone) {
+        alert('⚠️ Preencha o Celular do Cliente para enviar.');
+        const el = document.getElementById('celularcliente') || document.getElementById('celular_cliente');
+        if (el) el.focus();
+        return;
+    }
+
+    let mensagem = '';
+    const saudacao = obterSaudacao();
+
+    if (tipo === 'orcamento') {
+        mensagem = `*${saudacao}, ${nome}! Tudo bem?* 👋\n\nSou da *${nomeOficina}*. Segue o orçamento do seu veículo:\n\n🚗 *Veículo:* ${modelo}\n🔠 *Placa:* ${placa.toUpperCase()}\n💰 *Total:* R$ ${valorTotal}\n\n📄 *O PDF detalhado está em anexo.*\n\nFico no aguardo da sua aprovação!`;
+    } else {
+        mensagem = `*${saudacao}, ${nome}! Tudo bem?* 👋\n\nSou da *${nomeOficina}*. Finalizamos a inspeção do seu veículo:\n\n🚗 *Veículo:* ${modelo}\n🔠 *Placa:* ${placa.toUpperCase()}\n\n📸 *As fotos e o relatório técnico estão em anexo.*\n\nQualquer dúvida, estou à disposição!`;
+    }
+
+    const url = `https://api.whatsapp.com/send?phone=55${telefone}&text=${encodeURIComponent(mensagem)}`;
+    window.open(url, '_blank');
+}
+
+function obterSaudacao() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Bom dia';
+    if (h < 18) return 'Boa tarde';
+    return 'Boa noite';
 }
